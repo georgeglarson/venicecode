@@ -1,145 +1,105 @@
-<p align="center">
-<h1 align="center">VeniceCode</h1>
-<p align="center">AI-powered development tool with Venice AI integration</p>
-<p align="center">Built on <a href="https://github.com/sst/opencode">OpenCode</a> with enhanced model compatibility</p>
-</p>
-
----
-
-### 🎉 What's New in VeniceCode
-
-- **Enhanced Model Compatibility**: Fixed write tool to support GLM 4.6 and Qwen 3 Coder models
-- **Venice AI Integration**: Seamless integration with Venice AI API
-- **Variable Substitution**: Support for command substitution `$(cmd)` and environment variables `$VAR`
-
-### Installation
-
-```bash
-git clone https://github.com/yourusername/venicecode.git
-cd venicecode
-npm install -g opencode-ai@latest  # or use bun/pnpm/yarn
-```
-
-### Quick Start
-
-```bash
-# Set your Venice AI API key
-export VENICE_API_KEY="your-api-key-here"
-
-# Start VeniceCode
-venicecode
-```
-
-### Venice AI Integration
-
-VeniceCode works seamlessly with Venice AI's API. Simply set your API key and start coding!
-
-### Compatibility
-
-This fork includes a critical fix for GLM 4.6 and Qwen 3 Coder models that expect array content in tool responses. The fix ensures backward compatibility with all other models.
-
----
-
-## Original OpenCode Documentation
+# VeniceCode: The Venice.ai-Optimized Coding Agent
 
 <p align="center">
-  <a href="https://opencode.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
+  <a href="https://github.com/georgeglarson/venicecode">
+    <img src="https://raw.githubusercontent.com/georgeglarson/venice-dev-tools/main/docs/assets/venice-logo-wordmark-black.svg" alt="VeniceCode Logo" width="400">
   </a>
 </p>
-<p align="center">The AI coding agent built for the terminal.</p>
+
 <p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/sst/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/sst/opencode/publish.yml?style=flat-square&branch=dev" /></a>
+  <b>The AI coding agent for developers who value privacy and performance.</b>
 </p>
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+<p align="center">
+  <a href="https://github.com/georgeglarson/venicecode/stargazers"><img src="https://img.shields.io/github/stars/georgeglarson/venicecode?style=flat-square" alt="Stars"></a>
+  <a href="https://github.com/georgeglarson/venicecode/forks"><img src="https://img.shields.io/github/forks/georgeglarson/venicecode?style=flat-square" alt="Forks"></a>
+  <a href="https://github.com/georgeglarson/venicecode/issues"><img src="https://img.shields.io/github/issues/georgeglarson/venicecode?style=flat-square" alt="Issues"></a>
+  <a href="https://github.com/georgeglarson/venice-dev-tools"><img src="https://img.shields.io/badge/powered%20by-venice--dev--tools-blue?style=flat-square" alt="Powered by venice-dev-tools"></a>
+  <a href="https://github.com/georgeglarson/venicecode/blob/main/LICENSE"><img src="https://img.shields.io/github/license/georgeglarson/venicecode?style=flat-square" alt="License"></a>
+</p>
 
 ---
+
+**VeniceCode** is a powerful, terminal-based AI coding agent for developers, built on a modern TypeScript/Bun stack. It is a community-driven fork of the archived `opencode-ai/opencode` project, optimized for use with the [Venice.ai](https://venice.ai) platform.
+
+If you were a fan of OpenCode and are looking for an actively maintained, privacy-focused alternative, you're in the right place.
+
+## Why VeniceCode?
+
+When `opencode` was archived, the official successor became `crush`, a Go-based project. While `crush` is a great tool, we believe there is a need for a TypeScript-native alternative that is deeply integrated with the Venice.ai ecosystem.
+
+| Feature | **VeniceCode** | **Crush (Successor)** | **OpenCode (Archived)** |
+| :--- | :--- | :--- | :--- |
+| **Language** | **TypeScript/Bun** | Go | Go |
+| **Status** | ✅ Actively Maintained | ✅ Actively Maintained | ❌ Archived |
+| **Venice.ai Optimized** | ✅ **Yes** | ⚠️ Partial (via PR) | ❌ No |
+| **Community** | 🚀 Growing | established | 흩어진 |
+| **Accessibility** | High (for JS/TS devs) | Medium | Medium |
+| **Extensibility** | High (JS/TS plugins) | Medium | Low |
+
+### Key Advantages
+
+- **Modern Tech Stack:** Built with TypeScript and Bun, making it fast, efficient, and easy for web developers to contribute.
+- **Venice.ai First:** Designed from the ground up for seamless integration with Venice.ai, ensuring optimal performance and compatibility.
+- **Privacy-Focused:** Leverages the privacy-preserving features of the Venice.ai platform.
+- **Community-Driven:** As a fork of a beloved project, we are committed to building in the open and listening to our users.
+- **Familiar Interface:** If you loved OpenCode, you'll feel right at home with VeniceCode.
+
+## Key Features
+
+- **Enhanced Model Compatibility:** Includes critical fixes for models like GLM 4.6 and Qwen 3 Coder that send array content.
+- **Seamless Venice.ai Integration:** Just set your `VENICE_API_KEY` and you're ready to go.
+- **Powered by `venice-dev-tools`:** Built on a production-ready, battle-tested SDK for the Venice.ai platform.
+- **Interactive TUI:** A smooth, terminal-based user interface for an exceptional developer experience.
+- **Extensible Tooling:** Easily add new tools and capabilities using TypeScript.
+
+## Getting Started
 
 ### Installation
 
 ```bash
-# YOLO
-curl -fsSL https://opencode.ai/install | bash
+# Clone the repository
+git clone https://github.com/georgeglarson/venicecode.git
+cd venicecode
 
-# Package managers
-npm i -g opencode-ai@latest        # or bun/pnpm/yarn
-scoop bucket add extras; scoop install extras/opencode  # Windows
-choco install opencode             # Windows
-brew install opencode              # macOS and Linux
-paru -S opencode-bin               # Arch Linux
-mise use --pin -g ubi:sst/opencode # Any OS
-nix run nixpkgs#opencode           # or github:sst/opencode for latest dev branch
+# Install dependencies
+bun install
+
+# Run VeniceCode
+bun run dev
 ```
 
-> [!TIP]
-> Remove versions older than 0.1.x before installing.
+### Configuration
 
-#### Installation Directory
-
-The install script respects the following priority order for the installation path:
-
-1. `$OPENCODE_INSTALL_DIR` - Custom installation directory
-2. `$XDG_BIN_DIR` - XDG Base Directory Specification compliant path
-3. `$HOME/bin` - Standard user binary directory (if exists or can be created)
-4. `$HOME/.opencode/bin` - Default fallback
+To get started, simply set your Venice.ai API key as an environment variable:
 
 ```bash
-# Examples
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+export VENICE_API_KEY="your-api-key-here"
 ```
 
-### Agents
+## The Future of VeniceCode
 
-OpenCode includes two built-in agents you can switch between,
-you can switch between these using the `Tab` key.
+We believe VeniceCode has the potential to become the go-to AI coding agent for the TypeScript and Venice.ai communities. Our roadmap includes:
 
-- **build** - Default, full access agent for development work
-- **plan** - Read-only agent for analysis and code exploration
-  - Denies file edits by default
-  - Asks permission before running bash commands
-  - Ideal for exploring unfamiliar codebases or planning changes
+- **Deeper Venice.ai Integration:** Custom prompts, model presets, and performance tuning.
+- **Web-Based UI:** A browser-based interface for those who prefer a GUI.
+- **VS Code Extension:** Bring the power of VeniceCode directly into your editor.
+- **Plugin Ecosystem:** A rich ecosystem of community-contributed tools and extensions.
 
-Also, included is a **general** subagent for complex searches and multi-step tasks.
-This is used internally and can be invoked using `@general` in messages.
+## Community & Contributing
 
-Learn more about [agents](https://opencode.ai/docs/agents).
+We are actively looking for contributors to help us build the future of AI-powered development. Whether you're a developer, designer, or just an enthusiastic user, we'd love to have you on board.
 
-### Documentation
+- **[Open Issues](https://github.com/georgeglarson/venicecode/issues):** See where you can help.
+- **[Pull Requests](https://github.com/georgeglarson/venicecode/pulls):** Contribute your code.
+- **[Discussions](https://github.com/georgeglarson/venicecode/discussions):** Share your ideas.
 
-For more info on how to configure OpenCode [**head over to our docs**](https://opencode.ai/docs).
+This project is a community effort, and we welcome all contributions. Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started.
 
-### Contributing
+## A Note to the OpenCode Community
 
-If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
+We are grateful for the work of the original OpenCode team. VeniceCode aims to continue the legacy of this great project while adapting it for the future of AI development with Venice.ai. If you're looking for a new home for your AI coding agent, we invite you to join us.
 
-### Building on OpenCode
+## License
 
-If you are working on a project that's related to OpenCode and is using "opencode" as a part of its name; for example, "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OpenCode team and is not affiliated with us in anyway.
-
-### FAQ
-
-#### How is this different than Claude Code?
-
-It's very similar to Claude Code in terms of capability. Here are the key differences:
-
-- 100% open source
-- Not coupled to any provider. Although we recommend the models we provide through [OpenCode Zen](https://opencode.ai/zen); OpenCode can be used with Claude, OpenAI, Google or even local models. As models evolve the gaps between them will close and pricing will drop so being provider-agnostic is important.
-- Out of the box LSP support
-- A focus on TUI. OpenCode is built by neovim users and the creators of [terminal.shop](https://terminal.shop); we are going to push the limits of what's possible in the terminal.
-- A client/server architecture. This for example can allow OpenCode to run on your computer, while you can drive it remotely from a mobile app. Meaning that the TUI frontend is just one of the possible clients.
-
-#### What's the other repo?
-
-The other confusingly named repo has no relation to this one. You can [read the story behind it here](https://x.com/thdxr/status/1933561254481666466).
-
----
-
-**Join our community** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+VeniceCode is licensed under the [MIT License](LICENSE).
