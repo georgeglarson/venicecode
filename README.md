@@ -28,14 +28,14 @@ If you were a fan of OpenCode and are looking for an actively maintained, privac
 
 When `opencode` was archived, the official successor became `crush`, a Go-based project. While `crush` is a great tool, we believe there is a need for a TypeScript-native alternative that is deeply integrated with the Venice.ai ecosystem.
 
-| Feature | **VeniceCode** | **Crush (Successor)** | **OpenCode (Archived)** |
-| :--- | :--- | :--- | :--- |
-| **Language** | **TypeScript/Bun** | Go | Go |
-| **Status** | ✅ Actively Maintained | ✅ Actively Maintained | ❌ Archived |
-| **Venice.ai Optimized** | ✅ **Yes** | ⚠️ Partial (via PR) | ❌ No |
-| **Community** | 🚀 Growing | established | 흩어진 |
-| **Accessibility** | High (for JS/TS devs) | Medium | Medium |
-| **Extensibility** | High (JS/TS plugins) | Medium | Low |
+| Feature                 | **VeniceCode**         | **Crush (Successor)**  | **OpenCode (Archived)** |
+| :---------------------- | :--------------------- | :--------------------- | :---------------------- |
+| **Language**            | **TypeScript/Bun**     | Go                     | Go                      |
+| **Status**              | ✅ Actively Maintained | ✅ Actively Maintained | ❌ Archived             |
+| **Venice.ai Optimized** | ✅ **Yes**             | ⚠️ Partial (via PR)    | ❌ No                   |
+| **Community**           | 🚀 Growing             | established            | 흩어진                  |
+| **Accessibility**       | High (for JS/TS devs)  | Medium                 | Medium                  |
+| **Extensibility**       | High (JS/TS plugins)   | Medium                 | Low                     |
 
 ### Key Advantages
 

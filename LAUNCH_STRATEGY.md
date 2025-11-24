@@ -2,9 +2,9 @@
 
 ## 1. Positioning
 
-**Primary Positioning:** *The Venice.ai-Optimized Coding Agent for TypeScript Developers.*
+**Primary Positioning:** _The Venice.ai-Optimized Coding Agent for TypeScript Developers._
 
-**Secondary Positioning:** *The community-driven, privacy-focused successor to OpenCode.*
+**Secondary Positioning:** _The community-driven, privacy-focused successor to OpenCode._
 
 Our goal is to capture the abandoned OpenCode community and attract new users from the TypeScript ecosystem who value privacy and performance. We are not competing directly with `crush` on its home turf (the Go community); instead, we are carving out a new niche.
 

@@ -17,17 +17,20 @@ I'm excited to share VeniceCode, a community-driven fork of the now-archived Ope
 **Background:** When OpenCode was archived earlier this year, the official successor became Crush (a Go-based project by Charm). While Crush is great, I saw an opportunity to create a TypeScript-native alternative that's deeply integrated with the Venice.ai ecosystem.
 
 **What is VeniceCode?**
+
 - A terminal-based AI coding agent built on TypeScript/Bun
 - Optimized for Venice.ai (privacy-focused AI platform)
 - Includes critical fixes for models like GLM 4.6 and Qwen 3 Coder
 - Powered by the battle-tested `venice-dev-tools` SDK
 
 **Why TypeScript?**
+
 - More accessible to the massive JS/TS developer community
 - Easier to extend and customize
 - Leverages the rich npm ecosystem
 
 **Current Status:**
+
 - Fully functional and ready to use
 - Actively maintained
 - Looking for contributors!
@@ -51,6 +54,7 @@ I wanted to share a project I've been working on: **VeniceCode**, a TypeScript-b
 **Background:** VeniceCode is a fork of the now-archived OpenCode project. When OpenCode was archived, the official successor became Crush (a Go-based tool). I saw an opportunity to create a TypeScript-native alternative that's optimized for the Venice.ai platform.
 
 **Key Features:**
+
 - Built with TypeScript and Bun
 - Terminal-based interface (TUI)
 - Optimized for Venice.ai (privacy-focused AI)
@@ -58,6 +62,7 @@ I wanted to share a project I've been working on: **VeniceCode**, a TypeScript-b
 - Easy to extend with TypeScript plugins
 
 **Why I built this:**
+
 - I wanted a coding agent that fits naturally into the TypeScript ecosystem
 - I value privacy and wanted to leverage Venice.ai's privacy-preserving features
 - I believe the OpenCode community deserves an actively maintained alternative
@@ -113,6 +118,7 @@ Hi everyone,
 Since OpenCode has been archived, I wanted to let you know about **VeniceCode**, a community-driven fork that's actively maintained.
 
 **What is VeniceCode?**
+
 - A TypeScript/Bun-based fork of OpenCode
 - Optimized for Venice.ai (privacy-focused AI platform)
 - Includes critical fixes for models like GLM 4.6 and Qwen 3 Coder
@@ -137,7 +143,7 @@ Today, I'm excited to introduce **VeniceCode**.
 
 **Body:**
 
-*(Continue with the story of why you created VeniceCode, the technical details, the vision for the future, and a call to action for contributors and users.)*
+_(Continue with the story of why you created VeniceCode, the technical details, the vision for the future, and a call to action for contributors and users.)_
 
 ---
 
@@ -152,6 +158,7 @@ Hey Venice.ai community!
 I've been working on a project that I think you'll find interesting: **VeniceCode**, a terminal-based AI coding agent that's optimized for Venice.ai.
 
 **What makes it special:**
+
 - Built with TypeScript and Bun
 - Designed specifically for Venice.ai models
 - Includes fixes for models like GLM 4.6 and Qwen 3 Coder
