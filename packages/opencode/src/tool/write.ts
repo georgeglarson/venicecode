@@ -22,8 +22,7 @@ export const WriteTool = Tool.define("write", {
         }
         if (Array.isArray(val)) {
           // Join array elements with newlines
-          return val.map(item => String(item)).join('
-')
+          return val.map(item => String(item)).join('\n')
         }
         return String(val)
       },
