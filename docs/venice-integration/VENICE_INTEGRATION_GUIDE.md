@@ -106,12 +106,14 @@ Specify which Venice.ai models to use:
 Venice.ai provides access to a wide range of open-source models:
 
 ### Llama Models
+
 - `llama-3.3-70b` - Latest Llama 3.3 (recommended for most tasks)
 - `llama-3.1-405b-reasoning` - Largest Llama model for complex reasoning
 - `llama-3.1-70b-versatile` - Balanced performance and speed
 - `llama-3.1-8b-instant` - Fast responses for simple tasks
 
 ### Specialized Models
+
 - `codestral-22b-instruct` - Optimized for code generation
 - `gemma-2-27b-it` - Google's Gemma for instruction following
 - `gemma-2-9b-it` - Smaller Gemma variant
@@ -150,20 +152,18 @@ opencode --model venice/codestral-22b-instruct "Write a function to sort an arra
 If you're using OpenCode programmatically:
 
 ```typescript
-import { VeniceAI } from '@venice-dev-tools/core';
+import { VeniceAI } from "@venice-dev-tools/core"
 
 const venice = new VeniceAI({
-  apiKey: process.env.VENICE_API_KEY!
-});
+  apiKey: process.env.VENICE_API_KEY!,
+})
 
 const completion = await venice.chat.completions.create({
-  model: 'llama-3.3-70b',
-  messages: [
-    { role: 'user', content: 'Explain how Venice.ai works' }
-  ]
-});
+  model: "llama-3.3-70b",
+  messages: [{ role: "user", content: "Explain how Venice.ai works" }],
+})
 
-console.log(completion.choices[0].message.content);
+console.log(completion.choices[0].message.content)
 ```
 
 ## Troubleshooting
@@ -235,6 +235,7 @@ pnpm add @venice-dev-tools/core
 ```
 
 Features include:
+
 - Rate limiting and retries
 - Streaming support
 - Privacy-forward defaults

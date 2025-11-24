@@ -4,9 +4,9 @@
     "venice": {
       "npm": "@venice-dev-tools/core",
       "options": {
-        "apiKey": "$VENICE_API_KEY"
-      }
-    }
+        "apiKey": "$VENICE_API_KEY",
+      },
+    },
   },
   "models": {
     "venice": [
@@ -17,7 +17,7 @@
       "gemma-2-9b-it",
       "codestral-22b-instruct",
       "mixtral-8x22b-instruct",
-      "firellava-13b"
-    ]
-  }
+      "firellava-13b",
+    ],
+  },
 }
