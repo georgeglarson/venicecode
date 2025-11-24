@@ -1,4 +1,48 @@
 <p align="center">
+<h1 align="center">VeniceCode</h1>
+<p align="center">AI-powered development tool with Venice AI integration</p>
+<p align="center">Built on <a href="https://github.com/sst/opencode">OpenCode</a> with enhanced model compatibility</p>
+</p>
+
+---
+
+### 🎉 What's New in VeniceCode
+
+- **Enhanced Model Compatibility**: Fixed write tool to support GLM 4.6 and Qwen 3 Coder models
+- **Venice AI Integration**: Seamless integration with Venice AI API
+- **Variable Substitution**: Support for command substitution `$(cmd)` and environment variables `$VAR`
+
+### Installation
+
+```bash
+git clone https://github.com/yourusername/venicecode.git
+cd venicecode
+npm install -g opencode-ai@latest  # or use bun/pnpm/yarn
+```
+
+### Quick Start
+
+```bash
+# Set your Venice AI API key
+export VENICE_API_KEY="your-api-key-here"
+
+# Start VeniceCode
+venicecode
+```
+
+### Venice AI Integration
+
+VeniceCode works seamlessly with Venice AI's API. Simply set your API key and start coding!
+
+### Compatibility
+
+This fork includes a critical fix for GLM 4.6 and Qwen 3 Coder models that expect array content in tool responses. The fix ensures backward compatibility with all other models.
+
+---
+
+## Original OpenCode Documentation
+
+<p align="center">
   <a href="https://opencode.ai">
     <picture>
       <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
