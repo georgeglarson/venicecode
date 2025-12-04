@@ -1,4 +1,5 @@
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import path from "path"
 import { Tool } from "./tool"
 import DESCRIPTION from "./glob.txt"
@@ -8,7 +9,7 @@ import { Instance } from "../project/instance"
 export const GlobTool = Tool.define("glob", {
   description: DESCRIPTION,
   parameters: z.object({
-    pattern: z.string().describe("The glob pattern to match files against"),
+    pattern: stringOrArray("The glob pattern to match files against"),
     path: z
       .string()
       .optional()

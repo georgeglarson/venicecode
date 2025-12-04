@@ -1,4 +1,5 @@
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import * as fs from "fs"
 import * as path from "path"
 import { Tool } from "./tool"
@@ -19,7 +20,7 @@ const MAX_LINE_LENGTH = 2000
 export const ReadTool = Tool.define("read", {
   description: DESCRIPTION,
   parameters: z.object({
-    filePath: z.string().describe("The path to the file to read"),
+    filePath: stringOrArray("The path to the file to read"),
     offset: z.coerce.number().describe("The line number to start reading from (0-based)").optional(),
     limit: z.coerce.number().describe("The number of lines to read (defaults to 2000)").optional(),
   }),

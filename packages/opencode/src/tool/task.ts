@@ -1,6 +1,7 @@
 import { Tool } from "./tool"
 import DESCRIPTION from "./task.txt"
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import { Session } from "../session"
 import { Bus } from "../bus"
 import { MessageV2 } from "../session/message-v2"
@@ -21,9 +22,9 @@ export const TaskTool = Tool.define("task", async () => {
   return {
     description,
     parameters: z.object({
-      description: z.string().describe("A short (3-5 words) description of the task"),
-      prompt: z.string().describe("The task for the agent to perform"),
-      subagent_type: z.string().describe("The type of specialized agent to use for this task"),
+      description: stringOrArray("A short (3-5 words) description of the task"),
+      prompt: stringOrArray("The task for the agent to perform"),
+      subagent_type: stringOrArray("The type of specialized agent to use for this task"),
       session_id: z.string().describe("Existing Task session to continue").optional(),
     }),
     async execute(params, ctx) {

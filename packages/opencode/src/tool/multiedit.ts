@@ -1,4 +1,5 @@
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import { Tool } from "./tool"
 import { EditTool } from "./edit"
 import DESCRIPTION from "./multiedit.txt"
@@ -8,13 +9,13 @@ import { Instance } from "../project/instance"
 export const MultiEditTool = Tool.define("multiedit", {
   description: DESCRIPTION,
   parameters: z.object({
-    filePath: z.string().describe("The absolute path to the file to modify"),
+    filePath: stringOrArray("The absolute path to the file to modify"),
     edits: z
       .array(
         z.object({
-          filePath: z.string().describe("The absolute path to the file to modify"),
-          oldString: z.string().describe("The text to replace"),
-          newString: z.string().describe("The text to replace it with (must be different from oldString)"),
+          filePath: stringOrArray("The absolute path to the file to modify"),
+          oldString: stringOrArray("The text to replace"),
+          newString: stringOrArray("The text to replace it with (must be different from oldString)"),
           replaceAll: z.boolean().optional().describe("Replace all occurrences of oldString (default false)"),
         }),
       )

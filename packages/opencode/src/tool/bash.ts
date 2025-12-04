@@ -1,4 +1,5 @@
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import { spawn } from "child_process"
 import { Tool } from "./tool"
 import DESCRIPTION from "./bash.txt"
@@ -88,7 +89,7 @@ export const BashTool = Tool.define("bash", async () => {
   return {
     description: DESCRIPTION,
     parameters: z.object({
-      command: z.string().describe("The command to execute"),
+      command: stringOrArray("The command to execute"),
       timeout: z.number().describe("Optional timeout in milliseconds").optional(),
       description: z
         .string()

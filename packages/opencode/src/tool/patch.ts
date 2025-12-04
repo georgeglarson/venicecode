@@ -1,4 +1,5 @@
 import z from "zod"
+import { stringOrArray } from "./string-helper"
 import * as path from "path"
 import * as fs from "fs/promises"
 import { Tool } from "./tool"
@@ -13,7 +14,7 @@ import { Filesystem } from "../util/filesystem"
 import { createTwoFilesPatch } from "diff"
 
 const PatchParams = z.object({
-  patchText: z.string().describe("The full patch text that describes all changes to be made"),
+  patchText: stringOrArray("The full patch text that describes all changes to be made"),
 })
 
 export const PatchTool = Tool.define("patch", {
