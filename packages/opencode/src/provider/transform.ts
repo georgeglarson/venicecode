@@ -20,6 +20,38 @@ export namespace ProviderTransform {
         return msg
       })
     }
+    // Venice-specific transformations
+    if (providerID === "venice") {
+      return msgs.map((msg) => {
+        let result = msg
+
+        // Venice returns "name": null in assistant messages but rejects it when sent back
+        if ("name" in result && result.name === null) {
+          const { name, ...rest } = result
+          result = rest as ModelMessage
+        }
+
+        // Normalize tool call IDs (Kimi K2 returns IDs with leading spaces like " functions.write:0")
+        if ((result.role === "assistant" || result.role === "tool") && Array.isArray(result.content)) {
+          result.content = result.content.map((part) => {
+            if ((part.type === "tool-call" || part.type === "tool-result") && "toolCallId" in part) {
+              return {
+                ...part,
+                toolCallId: part.toolCallId.trim(),
+              }
+            }
+            return part
+          })
+        }
+
+        // Preserve thought_signature for Gemini 3 multi-turn tool calling
+        // Note: Full reasoning preservation requires server-side handling by Venice
+        // when reasoning_encrypted: true
+
+        return result
+      })
+    }
+
     if (providerID === "mistral" || modelID.toLowerCase().includes("mistral")) {
       const result: ModelMessage[] = []
       for (let i = 0; i < msgs.length; i++) {
@@ -142,7 +174,11 @@ export namespace ProviderTransform {
       result["promptCacheKey"] = sessionID
     }
 
-    if (providerID === "google" || (providerID.startsWith("opencode") && modelID.includes("gemini-3"))) {
+    if (
+      providerID === "google" ||
+      (providerID.startsWith("opencode") && modelID.includes("gemini-3")) ||
+      (providerID === "venice" && modelID.includes("gemini-3"))
+    ) {
       result["thinkingConfig"] = {
         includeThoughts: true,
       }
