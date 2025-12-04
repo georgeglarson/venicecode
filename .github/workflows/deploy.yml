@@ -11,6 +11,8 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   deploy:
+    # Only run on the original repo, not forks
+    if: github.repository == 'sst/opencode'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
