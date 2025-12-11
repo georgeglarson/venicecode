@@ -86,7 +86,7 @@ export namespace SessionProcessor {
                     id: value.id,
                     hasProviderMetadata: !!value.providerMetadata,
                     providerMetadataKeys: value.providerMetadata ? Object.keys(value.providerMetadata) : [],
-                    providerMetadata: JSON.stringify(value.providerMetadata)?.slice(0, 500)
+                    providerMetadata: JSON.stringify(value.providerMetadata)?.slice(0, 500),
                   })
                   if (value.id in reasoningMap) {
                     const part = reasoningMap[value.id]

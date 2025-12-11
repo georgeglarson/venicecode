@@ -58,7 +58,10 @@ export namespace ProviderTransform {
 
         // Extract and store reasoning for Gemini 3 multi-turn tool calling
         if (result.role === "assistant" && Array.isArray(result.content)) {
-          console.error("[TRANSFORM] Assistant message content types:", result.content.map((p: any) => p.type))
+          console.error(
+            "[TRANSFORM] Assistant message content types:",
+            result.content.map((p: any) => p.type),
+          )
           console.error("[TRANSFORM] Full content:", JSON.stringify(result.content).slice(0, 500))
         }
         if (result.role === "assistant" && Array.isArray(result.content) && reasoningStore) {
@@ -75,9 +78,7 @@ export namespace ProviderTransform {
               // Extract reasoning_details from providerMetadata if available
               // Check multiple possible locations for reasoning_details
               const providerMeta = (part as any).providerMetadata || (part as any).providerOptions
-              const metadata = providerMeta?.openaiCompatible
-                || providerMeta?.venice
-                || providerMeta  // Also check top-level for stored metadata from processor
+              const metadata = providerMeta?.openaiCompatible || providerMeta?.venice || providerMeta // Also check top-level for stored metadata from processor
 
               console.error("[TRANSFORM] Checking metadata:", JSON.stringify(providerMeta)?.slice(0, 200))
 
@@ -97,7 +98,14 @@ export namespace ProviderTransform {
           }
 
           if (reasoningText || reasoningDetails.length > 0) {
-            console.error("[TRANSFORM] Storing reasoning for index", assistantIndex, "text:", reasoningText?.slice(0, 50), "details:", reasoningDetails.length)
+            console.error(
+              "[TRANSFORM] Storing reasoning for index",
+              assistantIndex,
+              "text:",
+              reasoningText?.slice(0, 50),
+              "details:",
+              reasoningDetails.length,
+            )
             reasoningStore.set(assistantIndex, {
               reasoning: reasoningText || undefined,
               reasoning_details: reasoningDetails.length > 0 ? reasoningDetails : undefined,
@@ -200,18 +208,18 @@ export namespace ProviderTransform {
   }
 
   export function message(msgs: ModelMessage[], providerID: string, modelID: string) {
-  // Defensive check - ensure msgs is an array of ModelMessages
-  if (!Array.isArray(msgs)) {
-    console.error("[TRANSFORM] message() received non-array:", typeof msgs)
-    return msgs
-  }
-  // Check if these look like UIMessages instead of ModelMessages  
-  const hasUIMessageFormat = msgs.some((m: any) => m.parts && !m.content)
-  if (hasUIMessageFormat) {
-    console.error("[TRANSFORM] WARNING: Received UIMessage format instead of ModelMessage!")
-    console.error("[TRANSFORM] First msg keys:", Object.keys(msgs[0] || {}))
-  }
-  msgs = normalizeMessages(msgs, providerID, modelID)
+    // Defensive check - ensure msgs is an array of ModelMessages
+    if (!Array.isArray(msgs)) {
+      console.error("[TRANSFORM] message() received non-array:", typeof msgs)
+      return msgs
+    }
+    // Check if these look like UIMessages instead of ModelMessages
+    const hasUIMessageFormat = msgs.some((m: any) => m.parts && !m.content)
+    if (hasUIMessageFormat) {
+      console.error("[TRANSFORM] WARNING: Received UIMessage format instead of ModelMessage!")
+      console.error("[TRANSFORM] First msg keys:", Object.keys(msgs[0] || {}))
+    }
+    msgs = normalizeMessages(msgs, providerID, modelID)
     if (providerID === "anthropic" || modelID.includes("anthropic") || modelID.includes("claude")) {
       msgs = applyCaching(msgs, providerID)
     }

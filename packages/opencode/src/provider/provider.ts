@@ -235,7 +235,8 @@ export namespace Provider {
           },
         },
       }
-    },    venice: async () => {
+    },
+    venice: async () => {
       return {
         autoload: false,
         options: {
@@ -274,7 +275,12 @@ export namespace Provider {
                         console.error("[VENICE INJECT] Data for index", assistantIndex, ":", !!data)
                         assistantIndex++
                         if (data) {
-                          console.error("[VENICE INJECT] Injecting reasoning for assistant", assistantIndex - 1, "details:", data.reasoning_details?.length)
+                          console.error(
+                            "[VENICE INJECT] Injecting reasoning for assistant",
+                            assistantIndex - 1,
+                            "details:",
+                            data.reasoning_details?.length,
+                          )
                           return {
                             ...msg,
                             reasoning: data.reasoning,
@@ -291,12 +297,25 @@ export namespace Provider {
                 }
 
                 // Debug logging
-                console.error("[VENICE REQUEST]", requestBody.model, "msgs:", requestBody.messages?.length, "has_reasoning:", requestBody.messages?.some((m: any) => m.reasoning_details))
+                console.error(
+                  "[VENICE REQUEST]",
+                  requestBody.model,
+                  "msgs:",
+                  requestBody.messages?.length,
+                  "has_reasoning:",
+                  requestBody.messages?.some((m: any) => m.reasoning_details),
+                )
                 // Log message structure for debugging
                 requestBody.messages?.forEach((m: any, i: number) => {
-                  console.error(`[VENICE MSG ${i}] role=${m.role} hasContent=${!!m.content} hasToolCalls=${!!m.tool_calls} hasReasoning=${!!m.reasoning_details}`)
-                  if (typeof m.content !== 'string' && m.content) {
-                    console.error(`[VENICE MSG ${i}] content type:`, typeof m.content, Array.isArray(m.content) ? 'array' : '')
+                  console.error(
+                    `[VENICE MSG ${i}] role=${m.role} hasContent=${!!m.content} hasToolCalls=${!!m.tool_calls} hasReasoning=${!!m.reasoning_details}`,
+                  )
+                  if (typeof m.content !== "string" && m.content) {
+                    console.error(
+                      `[VENICE MSG ${i}] content type:`,
+                      typeof m.content,
+                      Array.isArray(m.content) ? "array" : "",
+                    )
                   }
                 })
 
@@ -340,16 +359,22 @@ export namespace Provider {
                         if (delta?.reasoning_content) {
                           reasoning_content = (reasoning_content || "") + delta.reasoning_content
                         }
-if (delta?.reasoning_details && delta.reasoning_details.length > 0) {
-reasoning_details = [...(reasoning_details || []), ...delta.reasoning_details]
-console.error("[VENICE RESPONSE] Found reasoning_details in SSE chunk! Total:", reasoning_details.length)
-}
+                        if (delta?.reasoning_details && delta.reasoning_details.length > 0) {
+                          reasoning_details = [...(reasoning_details || []), ...delta.reasoning_details]
+                          console.error(
+                            "[VENICE RESPONSE] Found reasoning_details in SSE chunk! Total:",
+                            reasoning_details.length,
+                          )
+                        }
                         // Also check for final message format
                         const message = chunk?.choices?.[0]?.message
-if (message?.reasoning_details && message.reasoning_details.length > 0) {
-reasoning_details = [...(reasoning_details || []), ...message.reasoning_details]
-console.error("[VENICE RESPONSE] Found reasoning_details in message! Total:", reasoning_details.length)
-}
+                        if (message?.reasoning_details && message.reasoning_details.length > 0) {
+                          reasoning_details = [...(reasoning_details || []), ...message.reasoning_details]
+                          console.error(
+                            "[VENICE RESPONSE] Found reasoning_details in message! Total:",
+                            reasoning_details.length,
+                          )
+                        }
                         if (message?.reasoning_content) {
                           reasoning_content = message.reasoning_content
                         }
@@ -363,28 +388,48 @@ console.error("[VENICE RESPONSE] Found reasoning_details in message! Total:", re
                   try {
                     const responseData = JSON.parse(responseText)
                     const message = responseData?.choices?.[0]?.message
-reasoning_content = message?.reasoning_content
-reasoning_details = (message?.reasoning_details && message.reasoning_details.length > 0) ? message.reasoning_details : reasoning_details
+                    reasoning_content = message?.reasoning_content
+                    reasoning_details =
+                      message?.reasoning_details && message.reasoning_details.length > 0
+                        ? message.reasoning_details
+                        : reasoning_details
                   } catch {
                     // Parse error
                   }
                 }
 
-                console.error("[VENICE RESPONSE] Extracted reasoning:", !!reasoning_content, "details:", !!reasoning_details)
+                console.error(
+                  "[VENICE RESPONSE] Extracted reasoning:",
+                  !!reasoning_content,
+                  "details:",
+                  !!reasoning_details,
+                )
 
                 if (reasoning_details || reasoning_content) {
                   console.error("[VENICE RESPONSE] Storing reasoning!")
-                          console.error("[VENICE RESPONSE] Store size before:", VeniceReasoningContext.use().size)
+                  console.error("[VENICE RESPONSE] Store size before:", VeniceReasoningContext.use().size)
                   try {
                     const store = VeniceReasoningContext.use()
-                    const existingAssistants = requestBody.messages?.filter((m: any) => m.role === "assistant")?.length || 0
+                    const existingAssistants =
+                      requestBody.messages?.filter((m: any) => m.role === "assistant")?.length || 0
                     console.error("[VENICE RESPONSE] Storing at index", existingAssistants)
-                    console.error("[VENICE RESPONSE] Storing data:", { index: existingAssistants, hasReasoning: !!reasoning_content, reasoningLen: reasoning_content?.length, hasDetails: !!reasoning_details, detailsLen: reasoning_details?.length })
+                    console.error("[VENICE RESPONSE] Storing data:", {
+                      index: existingAssistants,
+                      hasReasoning: !!reasoning_content,
+                      reasoningLen: reasoning_content?.length,
+                      hasDetails: !!reasoning_details,
+                      detailsLen: reasoning_details?.length,
+                    })
                     store.set(existingAssistants, {
                       reasoning: reasoning_content,
                       reasoning_details: reasoning_details,
                     })
-                    console.error("[VENICE RESPONSE] Store size after set:", store.size, "keys:", Array.from(store.keys()))
+                    console.error(
+                      "[VENICE RESPONSE] Store size after set:",
+                      store.size,
+                      "keys:",
+                      Array.from(store.keys()),
+                    )
                   } catch (e) {
                     console.error("[VENICE RESPONSE] Failed to store:", e)
                   }
@@ -406,7 +451,6 @@ reasoning_details = (message?.reasoning_details && message.reasoning_details.len
         },
       }
     },
-
   }
 
   const state = Instance.state(async () => {

@@ -666,36 +666,38 @@ export namespace MessageV2 {
     }
 
     // Filter out part types that AI SDK's convertToModelMessages doesn't handle
-  // AI SDK 5.x doesn't handle 'reasoning' or 'step-start' in convertToModelMessages
-  // For Venice/Gemini 3, reasoning is injected via our custom fetch wrapper using VeniceReasoningContext
-  const filteredResult = result.map((msg: any) => ({
-    ...msg,
-    parts: msg.parts?.filter((p: any) => {
-      // step-start is internal and not supported by AI SDK
-      if (p.type === "step-start") return false
-      // reasoning parts are not supported by convertToModelMessages in AI SDK 5.x
-      // Venice reasoning is handled separately via VeniceReasoningContext
-      if (p.type === "reasoning") return false
-      return true
-    })
-  })).filter((msg: any) => msg.parts?.length > 0) // Remove empty messages
+    // AI SDK 5.x doesn't handle 'reasoning' or 'step-start' in convertToModelMessages
+    // For Venice/Gemini 3, reasoning is injected via our custom fetch wrapper using VeniceReasoningContext
+    const filteredResult = result
+      .map((msg: any) => ({
+        ...msg,
+        parts: msg.parts?.filter((p: any) => {
+          // step-start is internal and not supported by AI SDK
+          if (p.type === "step-start") return false
+          // reasoning parts are not supported by convertToModelMessages in AI SDK 5.x
+          // Venice reasoning is handled separately via VeniceReasoningContext
+          if (p.type === "reasoning") return false
+          return true
+        }),
+      }))
+      .filter((msg: any) => msg.parts?.length > 0) // Remove empty messages
 
-  console.error("[toModelMessage] Converting", filteredResult.length, "UIMessages (filtered from", result.length, ")")
-  filteredResult.forEach((msg: any, i: number) => {
-    console.error(`[toModelMessage] msg[${i}] role=${msg.role} parts=${msg.parts?.length}`)
-    msg.parts?.forEach((p: any, j: number) => {
-      console.error(`[toModelMessage]   part[${j}] type=${p.type}`)
+    console.error("[toModelMessage] Converting", filteredResult.length, "UIMessages (filtered from", result.length, ")")
+    filteredResult.forEach((msg: any, i: number) => {
+      console.error(`[toModelMessage] msg[${i}] role=${msg.role} parts=${msg.parts?.length}`)
+      msg.parts?.forEach((p: any, j: number) => {
+        console.error(`[toModelMessage]   part[${j}] type=${p.type}`)
+      })
     })
-  })
 
-  try {
-    return convertToModelMessages(filteredResult)
-  } catch (e: any) {
-    console.error("[toModelMessage] ERROR in convertToModelMessages:", e.message)
-    // Try to provide more debug info
-    console.error("[toModelMessage] Failing messages:", JSON.stringify(filteredResult, null, 2).slice(0, 1000))
-    throw e
-  }
+    try {
+      return convertToModelMessages(filteredResult)
+    } catch (e: any) {
+      console.error("[toModelMessage] ERROR in convertToModelMessages:", e.message)
+      // Try to provide more debug info
+      console.error("[toModelMessage] Failing messages:", JSON.stringify(filteredResult, null, 2).slice(0, 1000))
+      throw e
+    }
   }
 
   export const stream = fn(Identifier.schema("session"), async function* (sessionID) {
