@@ -12,6 +12,7 @@ import { Auth } from "../auth"
 import { Instance } from "../project/instance"
 import { Flag } from "../flag/flag"
 import { iife } from "@/util/iife"
+import { VeniceReasoningContext } from "./venice-context"
 
 export namespace Provider {
   const log = Log.create({ service: "provider" })
@@ -234,7 +235,178 @@ export namespace Provider {
           },
         },
       }
+    },    venice: async () => {
+      return {
+        autoload: false,
+        options: {
+          fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+            let requestBody: any = null
+
+            if (init?.method === "POST" && init.body) {
+              try {
+                requestBody = JSON.parse(init.body as string)
+
+                // Add venice_parameters for all Venice requests
+                if (!requestBody.venice_parameters) {
+                  requestBody.venice_parameters = {
+                    include_venice_system_prompt: false,
+                  }
+                }
+
+                // Remove thinkingConfig - Venice API doesn't support it
+                if (requestBody.thinkingConfig) {
+                  delete requestBody.thinkingConfig
+                }
+
+                // For Gemini 3 models, inject stored reasoning data into outgoing requests
+                if (requestBody.model?.includes("gemini-3") && Array.isArray(requestBody.messages)) {
+                  console.error("[VENICE INJECT] Checking for reasoning to inject...")
+                  try {
+                    const store = VeniceReasoningContext.use()
+                    console.error("[VENICE INJECT] Got store, size:", store.size)
+                    // Log all stored keys
+                    console.error("[VENICE INJECT] Store keys:", Array.from(store.keys()))
+                    let assistantIndex = 0
+                    requestBody.messages = requestBody.messages.map((msg: any) => {
+                      if (msg.role === "assistant") {
+                        console.error("[VENICE INJECT] Checking assistant index", assistantIndex)
+                        const data = store.get(assistantIndex)
+                        console.error("[VENICE INJECT] Data for index", assistantIndex, ":", !!data)
+                        assistantIndex++
+                        if (data) {
+                          console.error("[VENICE INJECT] Injecting reasoning for assistant", assistantIndex - 1, "details:", data.reasoning_details?.length)
+                          return {
+                            ...msg,
+                            reasoning: data.reasoning,
+                            reasoning_details: data.reasoning_details,
+                          }
+                        }
+                      }
+                      return msg
+                    })
+                  } catch (e: any) {
+                    console.error("[VENICE INJECT] Context error:", e.message)
+                    // Context not available, continue normally
+                  }
+                }
+
+                // Debug logging
+                console.error("[VENICE REQUEST]", requestBody.model, "msgs:", requestBody.messages?.length, "has_reasoning:", requestBody.messages?.some((m: any) => m.reasoning_details))
+                // Log message structure for debugging
+                requestBody.messages?.forEach((m: any, i: number) => {
+                  console.error(`[VENICE MSG ${i}] role=${m.role} hasContent=${!!m.content} hasToolCalls=${!!m.tool_calls} hasReasoning=${!!m.reasoning_details}`)
+                  if (typeof m.content !== 'string' && m.content) {
+                    console.error(`[VENICE MSG ${i}] content type:`, typeof m.content, Array.isArray(m.content) ? 'array' : '')
+                  }
+                })
+
+                init = {
+                  ...init,
+                  body: JSON.stringify(requestBody),
+                }
+              } catch {
+                // Parse error, continue with original request
+              }
+            }
+
+            const response = await fetch(input, init)
+
+            if (!response.ok) {
+              const errorText = await response.text()
+              console.error("Venice API Error:", response.status, errorText)
+              throw new Error(errorText || response.statusText)
+            }
+
+            // For Gemini 3 models, intercept the response to capture reasoning_details
+            if (requestBody?.model?.includes("gemini-3")) {
+              console.error("[VENICE RESPONSE] Intercepting Gemini 3 response...")
+              try {
+                const clonedResponse = response.clone()
+                const responseText = await clonedResponse.text()
+                console.error("[VENICE RESPONSE] Response text length:", responseText.length)
+
+                // Handle SSE streaming format (lines starting with "data: ")
+                let reasoning_content: string | undefined
+                let reasoning_details: any[] | undefined
+
+                if (responseText.startsWith("data: ")) {
+                  // Parse SSE chunks
+                  const lines = responseText.split("\n")
+                  for (const line of lines) {
+                    if (line.startsWith("data: ") && line !== "data: [DONE]") {
+                      try {
+                        const chunk = JSON.parse(line.slice(6))
+                        const delta = chunk?.choices?.[0]?.delta
+                        if (delta?.reasoning_content) {
+                          reasoning_content = (reasoning_content || "") + delta.reasoning_content
+                        }
+if (delta?.reasoning_details && delta.reasoning_details.length > 0) {
+reasoning_details = [...(reasoning_details || []), ...delta.reasoning_details]
+console.error("[VENICE RESPONSE] Found reasoning_details in SSE chunk! Total:", reasoning_details.length)
+}
+                        // Also check for final message format
+                        const message = chunk?.choices?.[0]?.message
+if (message?.reasoning_details && message.reasoning_details.length > 0) {
+reasoning_details = [...(reasoning_details || []), ...message.reasoning_details]
+console.error("[VENICE RESPONSE] Found reasoning_details in message! Total:", reasoning_details.length)
+}
+                        if (message?.reasoning_content) {
+                          reasoning_content = message.reasoning_content
+                        }
+                      } catch {
+                        // Skip invalid JSON chunks
+                      }
+                    }
+                  }
+                } else {
+                  // Regular JSON response
+                  try {
+                    const responseData = JSON.parse(responseText)
+                    const message = responseData?.choices?.[0]?.message
+reasoning_content = message?.reasoning_content
+reasoning_details = (message?.reasoning_details && message.reasoning_details.length > 0) ? message.reasoning_details : reasoning_details
+                  } catch {
+                    // Parse error
+                  }
+                }
+
+                console.error("[VENICE RESPONSE] Extracted reasoning:", !!reasoning_content, "details:", !!reasoning_details)
+
+                if (reasoning_details || reasoning_content) {
+                  console.error("[VENICE RESPONSE] Storing reasoning!")
+                          console.error("[VENICE RESPONSE] Store size before:", VeniceReasoningContext.use().size)
+                  try {
+                    const store = VeniceReasoningContext.use()
+                    const existingAssistants = requestBody.messages?.filter((m: any) => m.role === "assistant")?.length || 0
+                    console.error("[VENICE RESPONSE] Storing at index", existingAssistants)
+                    console.error("[VENICE RESPONSE] Storing data:", { index: existingAssistants, hasReasoning: !!reasoning_content, reasoningLen: reasoning_content?.length, hasDetails: !!reasoning_details, detailsLen: reasoning_details?.length })
+                    store.set(existingAssistants, {
+                      reasoning: reasoning_content,
+                      reasoning_details: reasoning_details,
+                    })
+                    console.error("[VENICE RESPONSE] Store size after set:", store.size, "keys:", Array.from(store.keys()))
+                  } catch (e) {
+                    console.error("[VENICE RESPONSE] Failed to store:", e)
+                  }
+                }
+
+                // Return a new Response with the same body
+                return new Response(responseText, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: response.headers,
+                })
+              } catch (e) {
+                console.error("[VENICE RESPONSE] Error:", e)
+              }
+            }
+
+            return response
+          },
+        },
+      }
     },
+
   }
 
   const state = Instance.state(async () => {

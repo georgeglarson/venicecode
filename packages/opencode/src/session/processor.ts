@@ -12,6 +12,8 @@ import { Bus } from "@/bus"
 import { SessionRetry } from "./retry"
 import { SessionStatus } from "./status"
 
+import { VeniceReasoningContext } from "@/provider/venice-context"
+
 export namespace SessionProcessor {
   const DOOM_LOOP_THRESHOLD = 3
   const log = Log.create({ service: "session.processor" })
@@ -80,6 +82,12 @@ export namespace SessionProcessor {
                   break
 
                 case "reasoning-end":
+                  console.error("[PROCESSOR] reasoning-end event:", {
+                    id: value.id,
+                    hasProviderMetadata: !!value.providerMetadata,
+                    providerMetadataKeys: value.providerMetadata ? Object.keys(value.providerMetadata) : [],
+                    providerMetadata: JSON.stringify(value.providerMetadata)?.slice(0, 500)
+                  })
                   if (value.id in reasoningMap) {
                     const part = reasoningMap[value.id]
                     part.text = part.text.trimEnd()
@@ -89,6 +97,27 @@ export namespace SessionProcessor {
                       end: Date.now(),
                     }
                     if (value.providerMetadata) part.metadata = value.providerMetadata
+
+                    // Inject reasoning_details from VeniceReasoningContext if available
+                    try {
+                      const reasoningStore = VeniceReasoningContext.use()
+                      if (reasoningStore && reasoningStore.size > 0) {
+                        // Get the most recent reasoning data (index 0 for current response)
+                        const reasoningData = reasoningStore.get(0)
+                        if (reasoningData?.reasoning_details) {
+                          part.metadata = {
+                            ...part.metadata,
+                            reasoning_details: reasoningData.reasoning_details,
+                          }
+                          log.info("Injected reasoning_details from VeniceReasoningContext", {
+                            details_count: reasoningData.reasoning_details.length,
+                          })
+                        }
+                      }
+                    } catch {
+                      // Context not available, continue without injection
+                    }
+
                     await Session.updatePart(part)
                     delete reasoningMap[value.id]
                   }

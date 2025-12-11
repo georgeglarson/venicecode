@@ -23,6 +23,7 @@ import { SessionCompaction } from "./compaction"
 import { Instance } from "../project/instance"
 import { Bus } from "../bus"
 import { ProviderTransform } from "../provider/transform"
+import { VeniceReasoningContext, type ReasoningStore } from "../provider/venice-context"
 import { SystemPrompt } from "./system"
 import { Plugin } from "../plugin"
 
@@ -241,6 +242,11 @@ export namespace SessionPrompt {
     using _ = defer(() => cancel(sessionID))
 
     let step = 0
+
+    // Set up Venice reasoning context for Gemini 3 multi-turn conversations
+    // Must be outside while loop to persist across tool call iterations
+    const veniceReasoningStore: ReasoningStore = new Map()
+
     while (true) {
       SessionStatus.set(sessionID, { type: "busy" })
       log.info("loop", { step, sessionID })
@@ -505,7 +511,11 @@ export namespace SessionPrompt {
         })
       }
 
-      const result = await processor.process(() =>
+// Set up Venice reasoning context for Gemini 3 multi-turn conversations
+      const useVeniceContext = model.providerID === "venice" && model.modelID.includes("gemini-3")
+
+      const result = await (useVeniceContext
+        ? VeniceReasoningContext.provide(veniceReasoningStore, () => processor.process(() =>
         streamText({
           onError(error) {
             log.error("stream error", {
@@ -595,7 +605,98 @@ export namespace SessionPrompt {
             ],
           }),
         }),
-      )
+      ))
+        : processor.process(() =>
+        streamText({
+          onError(error) {
+            log.error("stream error", {
+              error,
+            })
+          },
+          async experimental_repairToolCall(input) {
+            const lower = input.toolCall.toolName.toLowerCase()
+            if (lower !== input.toolCall.toolName && tools[lower]) {
+              log.info("repairing tool call", {
+                tool: input.toolCall.toolName,
+                repaired: lower,
+              })
+              return {
+                ...input.toolCall,
+                toolName: lower,
+              }
+            }
+            return {
+              ...input.toolCall,
+              input: JSON.stringify({
+                tool: input.toolCall.toolName,
+                error: input.error.message,
+              }),
+              toolName: "invalid",
+            }
+          },
+          headers: {
+            ...(model.providerID.startsWith("opencode")
+              ? {
+                  "x-opencode-session": sessionID,
+                  "x-opencode-request": lastUser.id,
+                }
+              : undefined),
+            ...model.info.headers,
+          },
+          // set to 0, we handle loop
+          maxRetries: 0,
+          activeTools: Object.keys(tools).filter((x) => x !== "invalid"),
+          maxOutputTokens: ProviderTransform.maxOutputTokens(
+            model.providerID,
+            params.options,
+            model.info.limit.output,
+            OUTPUT_TOKEN_MAX,
+          ),
+          abortSignal: abort,
+          providerOptions: ProviderTransform.providerOptions(model.npm, model.providerID, params.options),
+          stopWhen: stepCountIs(1),
+          temperature: params.temperature,
+          topP: params.topP,
+          messages: [
+            ...system.map(
+              (x): ModelMessage => ({
+                role: "system",
+                content: x,
+              }),
+            ),
+            ...MessageV2.toModelMessage(
+              msgs.filter((m) => {
+                if (m.info.role !== "assistant" || m.info.error === undefined) {
+                  return true
+                }
+                if (
+                  MessageV2.AbortedError.isInstance(m.info.error) &&
+                  m.parts.some((part) => part.type !== "step-start" && part.type !== "reasoning")
+                ) {
+                  return true
+                }
+
+                return false
+              }),
+            ),
+          ],
+          tools: model.info.tool_call === false ? undefined : tools,
+          model: wrapLanguageModel({
+            model: model.language,
+            middleware: [
+              {
+                async transformParams(args) {
+                  if (args.type === "stream") {
+                    // @ts-expect-error
+                    args.params.prompt = ProviderTransform.message(args.params.prompt, model.providerID, model.modelID)
+                  }
+                  return args.params
+                },
+              },
+            ],
+          }),
+        }),
+      ))
       if (result === "stop") break
       continue
     }

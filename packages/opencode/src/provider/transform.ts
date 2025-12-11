@@ -1,6 +1,7 @@
 import type { ModelMessage } from "ai"
 import { unique } from "remeda"
 import type { JSONSchema } from "zod/v4/core"
+import { VeniceReasoningContext, type ReasoningData, type ReasoningStore } from "./venice-context"
 
 export namespace ProviderTransform {
   function normalizeMessages(msgs: ModelMessage[], providerID: string, modelID: string): ModelMessage[] {
@@ -22,6 +23,17 @@ export namespace ProviderTransform {
     }
     // Venice-specific transformations
     if (providerID === "venice") {
+      // Try to get reasoning store for Gemini 3 models
+      let reasoningStore: ReasoningStore | null = null
+      if (modelID.includes("gemini-3")) {
+        try {
+          reasoningStore = VeniceReasoningContext.use()
+        } catch {
+          // Context not available, reasoning won't be preserved
+        }
+      }
+
+      let assistantIndex = 0
       return msgs.map((msg) => {
         let result = msg
 
@@ -44,9 +56,57 @@ export namespace ProviderTransform {
           })
         }
 
-        // Preserve thought_signature for Gemini 3 multi-turn tool calling
-        // Note: Full reasoning preservation requires server-side handling by Venice
-        // when reasoning_encrypted: true
+        // Extract and store reasoning for Gemini 3 multi-turn tool calling
+        if (result.role === "assistant" && Array.isArray(result.content)) {
+          console.error("[TRANSFORM] Assistant message content types:", result.content.map((p: any) => p.type))
+          console.error("[TRANSFORM] Full content:", JSON.stringify(result.content).slice(0, 500))
+        }
+        if (result.role === "assistant" && Array.isArray(result.content) && reasoningStore) {
+          console.error("[TRANSFORM] Has reasoningStore, checking for reasoning parts...")
+          let reasoningText = ""
+          const reasoningDetails: any[] = []
+
+          for (const part of result.content) {
+            if (part.type === "reasoning") {
+              console.error("[TRANSFORM] Reasoning part keys:", Object.keys(part))
+              console.error("[TRANSFORM] providerOptions:", JSON.stringify((part as any).providerOptions))
+              console.error("[TRANSFORM] providerMetadata:", JSON.stringify((part as any).providerMetadata))
+              reasoningText += (part as any).text || ""
+              // Extract reasoning_details from providerMetadata if available
+              // Check multiple possible locations for reasoning_details
+              const providerMeta = (part as any).providerMetadata || (part as any).providerOptions
+              const metadata = providerMeta?.openaiCompatible
+                || providerMeta?.venice
+                || providerMeta  // Also check top-level for stored metadata from processor
+
+              console.error("[TRANSFORM] Checking metadata:", JSON.stringify(providerMeta)?.slice(0, 200))
+
+              if (metadata?.reasoning_details) {
+                const details = metadata.reasoning_details
+                console.error("[TRANSFORM] Found reasoning_details in metadata:", details.length)
+                reasoningDetails.push(...(Array.isArray(details) ? details : [details]))
+              }
+              // Also check for thought_signature in metadata
+              if (metadata?.thought_signature) {
+                reasoningDetails.push({
+                  type: "reasoning.encrypted",
+                  thought_signature: metadata.thought_signature,
+                })
+              }
+            }
+          }
+
+          if (reasoningText || reasoningDetails.length > 0) {
+            console.error("[TRANSFORM] Storing reasoning for index", assistantIndex, "text:", reasoningText?.slice(0, 50), "details:", reasoningDetails.length)
+            reasoningStore.set(assistantIndex, {
+              reasoning: reasoningText || undefined,
+              reasoning_details: reasoningDetails.length > 0 ? reasoningDetails : undefined,
+            })
+          }
+          assistantIndex++
+        } else if (result.role === "assistant") {
+          assistantIndex++
+        }
 
         return result
       })
@@ -140,7 +200,18 @@ export namespace ProviderTransform {
   }
 
   export function message(msgs: ModelMessage[], providerID: string, modelID: string) {
-    msgs = normalizeMessages(msgs, providerID, modelID)
+  // Defensive check - ensure msgs is an array of ModelMessages
+  if (!Array.isArray(msgs)) {
+    console.error("[TRANSFORM] message() received non-array:", typeof msgs)
+    return msgs
+  }
+  // Check if these look like UIMessages instead of ModelMessages  
+  const hasUIMessageFormat = msgs.some((m: any) => m.parts && !m.content)
+  if (hasUIMessageFormat) {
+    console.error("[TRANSFORM] WARNING: Received UIMessage format instead of ModelMessage!")
+    console.error("[TRANSFORM] First msg keys:", Object.keys(msgs[0] || {}))
+  }
+  msgs = normalizeMessages(msgs, providerID, modelID)
     if (providerID === "anthropic" || modelID.includes("anthropic") || modelID.includes("claude")) {
       msgs = applyCaching(msgs, providerID)
     }
